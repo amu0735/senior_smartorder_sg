@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>third+_coffee1</title>
+    <style>
+        .body{
+            font-family: 'Gill Sans', sans-serif;
+            background-color: #f0f0f0;
+        }
+        .container{
+            display: flex;
+            text-align:center;
+            flex-direction: column; 
+            align-items: center; 
+        }
+        #image_box{
+            background-color: rgb(201, 201, 201);
+            width:99vw;
+            height: 25em;
+
+        }
+        #text_box{
+            background-color: rgb(255, 255, 255);
+            color:rgb(12, 12, 90);
+            width:99vw;
+            height: 3em;
+            font-size: 3em;
+            font-weight: bold;
+        }
+    
+        #explain_box{
+            background-color: rgb(159, 169, 178);
+            width:99vw;
+            height: 10em;
+            font-size: 1.5em;
+            
+        }
+        #back {
+            width: 200px;
+            height: 80px;
+            background-color:  #DEE2EF;
+            color: rgb(0, 0, 110);
+            border-radius: 30px ;
+            font-size: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 30px;
+        }
+        #back a{ 
+            text-decoration: none;
+            color: rgb(0, 0, 110);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="image_box">
+            <img src= "{{ url_for('static', filename='tea/tea2.png') }}" width="235"height="303" style="margin-left: 50px; margin-top: 3em" >
+        </div>
+        <div id="text_box">
+            <p>스프링 캐모마일</p>
+        </div>
+        <div id="explain_box">
+            <p id="description"> 캐모마일, 루이보스, 레몬그라스 등이 <br> 함께 우러나서 은은하고 차분한 향을 <br> 즐길 수 있는 허브차 입니다 </p>
+            <div id="back" >
+                <a href="{{ url_for('third_tea')}}">
+                    <p>뒤로가기</p>
+                </a>
+            </div>
+        </div>
+    </div>
+    <script>
+        function playDescriptionVoice() {
+            const descriptionText = document.getElementById('description').innerText;
+
+            const synth = window.speechSynthesis;
+            const utterance = new SpeechSynthesisUtterance(descriptionText);
+            synth.speak(utterance);
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            playDescriptionVoice();
+        });
+    </script>
+    
+</body>
+</html>

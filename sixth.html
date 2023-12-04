@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sixth</title>
+    <style>
+    
+        body {
+            font-family: 'Gill Sans', sans-serif;
+            background-color: #f0f0f0;
+        }
+        #question {
+            display: flex;
+            margin-top: 1em;
+            gap: 10px;
+        }
+
+        button {
+            border: none;
+            padding: 0;
+            background: none;
+            cursor: pointer;
+        }
+
+        h1 {
+            font-size: 5em;
+            color: rgb(0, 0, 110);
+            font-weight: bold;
+            margin-left: 100px;
+            margin-right: 100px;
+        }
+        .quantity-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 1em; 
+            margin-bottom: 3em; 
+
+        }
+
+        .quantity-display {
+            font-size: 9em;
+            width: 300px;
+            height: 300px;
+            background-color: rgb(214, 214, 214);
+            color: rgb(0, 0, 110);
+            border-radius: 50%; /*원으로 바꿔줌*/
+            cursor: pointer;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+        }
+
+        .quantity-button {
+            background-color: rgb(214, 214, 214);
+            color: rgb(0, 0, 110);
+            border: none;
+            padding: 15px 30px ;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 80px;
+            font-weight: 200;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .select-container{
+            display: flex;
+            align-items: center;
+            justify-content:space-around;
+
+        }
+        .select-btn {
+            width: 200px;
+            height: 80px;
+            background-color:  #DEE2EF;
+            color: rgb(0, 0, 110);
+            border-radius: 30px ;
+            font-size: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #back{
+            text-decoration: none;
+            color: rgb(0, 0, 110);
+        }
+
+        .quantity-button:hover{
+            background-color: rgb(170, 170, 170);
+        }
+        .select-btn:hover {
+            background-color: rgb(191, 186, 205);
+        }
+        
+        
+        
+        
+    </style>
+</head>
+<body>
+    <div id="question">
+        <button type="button" id="startRecognitionButton" onclick="startSpeechRecognition()">
+            <img src="{{ url_for('static', filename='talk.png') }}" width="180" height="120" style="margin-left: 80px; margin-top: 40px;">
+        </button>
+        <h1>수량을 선택해주세요</h1>
+    </div>
+    <div id="recognizedText"></div>
+
+    <div class="quantity-container">
+        <button class="quantity-button" onclick="decreaseQuantity()">-</button>
+        <span class="quantity-display">0</span>
+        <button class="quantity-button" onclick="increaseQuantity()">+</button>
+    </div>
+    <div class="select-container">
+        <div class="select-btn">
+            <a id="back" href="{{ url_for('fifth') }}">
+                <p>뒤로가기</p>
+            </a>
+        </div>
+        
+        <div class="select-btn">
+            <a href="{{ url_for('seventh') }}">
+                <p>담아놓기</p>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        let quantity = 0;
+
+        function increaseQuantity() {
+            quantity++;
+            updateQuantityDisplay();
+        }
+
+        function decreaseQuantity() {
+            if (quantity > 0) {
+                quantity--;
+                updateQuantityDisplay();
+            }
+        }
+
+        function updateQuantityDisplay() {
+            document.querySelector('.quantity-display').textContent = quantity;
+        }
+    </script>
+</body>
+<script>
+    // 페이지 로드시 실행되는 함수
+    function playInitialVoice() {
+            const synth = window.speechSynthesis;
+            const utterance = new SpeechSynthesisUtterance('몇 잔 드릴까요?');
+            synth.speak(utterance);
+    }
+    function redirectPage(destination) {
+            window.location.href = destination;
+    }
+    function startSpeechRecognition() {
+            const recognitionButton = document.getElementById('startRecognitionButton');
+
+            recognitionButton.addEventListener('click', function () {
+                const recognition = new webkitSpeechRecognition();
+                recognition.lang = 'ko-KR';
+                recognition.start();
+
+
+                recognition.onresult = function(event) {
+                    const spokenText = event.results[0][0].transcript;
+                    document.getElementById('recognizedText').textContent = spokenText;
+    
+                    // 서버로 음성으로 인식된 텍스트 전송
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', '/order/coffee_type', true);
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+                    xhr.send(JSON.stringify({ 'spoken_text': spokenText }));
+                }
+            });
+        }
+        
+    </script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        playInitialVoice();  // 페이지 로드시 음성 재생
+        const recognitionButton = document.getElementById('startRecognitionButton');
+        recognitionButton.addEventListener('click', startSpeechRecognition);  // 음성 인식 시작
+    });
+</script>
+</html>

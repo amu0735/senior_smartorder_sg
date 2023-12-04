@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask Static first page</title>
+    <style>
+        body {
+            background-image: url('{{ url_for("static", filename="main background.jpg") }}'); 
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            margin: 0; /* Remove default margin on body */
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 116.5px;
+            color: #ffffff;
+            font-weight: bold;
+            margin-top: 1em;
+            margin-left: 0.5em;
+            text-align: left;
+            z-index: 1; /* Ensure text is above the background */
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: row; 
+            margin-left: 5em;
+            gap: 50px;
+            z-index: 1; /* Ensure buttons are above the background */
+            position: relative; /* Set a relative position for z-index to work */
+        }
+
+        .circle-btn {
+            width: 380px;
+            height: 130px;
+            border-radius: 50px;
+            border: none;
+            background-color: #ffffff;;
+            color: #5E536A;
+            font-size: 57px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            z-index: 1; /* Ensure buttons are above the background */
+        }
+
+        .circle-btn:hover {
+            background-color: #f6e2ff;
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <h1>안녕하세요!<br> 이디야 커피입니다</h1>
+    <div class="button-container">
+        <a href="{{ url_for('second') }}" class="circle-btn">먹고가기</a>
+        <a href="{{ url_for('second') }}" class="circle-btn">포장하기</a>
+    </div>
+
+</body>
+<script>
+    // 페이지 로드시 실행되는 함수
+    function playInitialVoice() {
+            const synth = window.speechSynthesis;
+            const utterance = new SpeechSynthesisUtterance('안녕하세요!');
+            synth.speak(utterance);
+    }
+    function redirectPage(destination) {
+            window.location.href = destination;
+    }
+
+    function startSpeechRecognition() {
+                const recognition = new webkitSpeechRecognition();
+                recognition.lang = 'ko-KR';
+                recognition.start();
+    
+    
+                recognition.onresult = function(event) {
+                    const spokenText = event.results[0][0].transcript;
+                    console.log('Recognized speech: ', spokenText);
+    
+    
+                    // 서버로 음성으로 인식된 텍스트 전송
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', '/order/coffee_type', true);
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+                    xhr.send(JSON.stringify({ 'spoken_text': spokenText }));
+                }
+            }
+            document.addEventListener("DOMContentLoaded", function() {
+            playInitialVoice();  // 페이지 로드시 음성 재생
+            startSpeechRecognition();  // 음성 인식 시작
+            });
+        </script>
+</html>

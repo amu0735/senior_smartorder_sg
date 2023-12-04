@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>seventh_page</title>
+    <style>
+        body {
+            font-family: 'Gill Sans', sans-serif;
+            background-color: #f0f0f0;
+        }
+        #question {
+            display: flex;
+            margin-top: 1em;
+            gap: 50px;
+        }
+
+        button {
+            border: none;
+            padding: 0;
+            background: none;
+            cursor: pointer;
+        }
+
+        h1 {
+            font-size: 5em;
+            color: rgb(0, 0, 110);
+            font-weight: bold;
+            margin-left: 100px;
+            margin-right: 100px;
+        }
+        #menu-container {
+            display: flex; 
+            flex-direction: column; 
+            margin-top: 2em;
+            margin-bottom: 5em;
+            gap:3em;
+        }
+        .menu-item {
+            background-color: #d0d3de;
+            border-radius: 80px ;
+            display: flex;
+            text-align:center;
+            justify-content: left;
+            gap: 50px;
+            margin-left: 70px;
+            margin-right: 70px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+
+        .circle{
+            width: 150px;
+            height: 150px;
+            background-color: rgb(255, 255, 255);
+            border-radius: 50%; 
+            margin-left: 30px ;
+            margin-top: 7px 
+        }
+        
+        .menu-text{
+            background-color: #f0f0f0;
+            color: rgb(0, 0, 110);
+            font-size: 2em;
+            font-weight: bold;
+            text-align: center;
+            border-radius: 40px ;
+            padding: 20px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+        }
+       
+        .select-container{
+            display: flex;
+            align-items: center;
+            justify-content:space-around;
+
+        }
+        .select-btn {
+            width: 210px;
+            height: 80px;
+            background-color:  #DEE2EF;
+            color: rgb(0, 0, 110);
+            border-radius: 40px ;
+            font-size: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        #back{
+            text-decoration: none;
+            color: rgb(0, 0, 110);
+        }
+     
+    </style>
+</head>
+
+<body>
+    <div id="question">
+        <button type="button" onclick="startSpeechRecognition()">
+            <img src="{{ url_for('static', filename='talk.png') }}" width="180" height="120" style="margin-left: 80px; margin-top: 40px;">
+        </button>
+        <h1>주문을 확인해주세요</h1>
+    </div>
+
+    <div id="menu-container">
+        <div class="menu-item">
+            <div class="circle">
+                <img src="{{ url_for('static', filename='coffee/coffee1.png') }}" width="90" height="120" style="margin-left: 20px; margin-top: 20px;">
+            </div>
+            <p class="menu-text">아메리카노</p>
+            <p class="menu-text">뜨거운</p>
+            <p class="menu-text">작은컵</p>
+            <p class="menu-text">1개</p>
+        </div>
+        <div class="menu-item">
+            <div class="circle">
+                <img src="{{ url_for('static', filename='tea/tea3.png') }}" width="90" height="120" style="margin-left: 20px; margin-top: 20px;">
+            </div>
+            <p class="menu-text">유자차</p>
+            <p class="menu-text">뜨거운</p>
+            <p class="menu-text">2개</p>
+        </div>
+    </div>
+
+    <div class="select-container">
+        <div class="select-btn">
+            <a id="back" href="{{ url_for('second') }}">
+                <p>이어서<br>주문하기</p>
+            </a>
+        </div>
+        <div class="select-btn">
+            <p>결제하기</p>
+        </div>
+    </div>
+</body>
+<script>
+    // 페이지 로드시 실행되는 함수
+    function playInitialVoice() {
+            const synth = window.speechSynthesis;
+            const utterance = new SpeechSynthesisUtterance('주문이 잘 되었나 확인해주세요');
+            synth.speak(utterance);
+    }
+    function redirectPage(destination) {
+            window.location.href = destination;
+    }
+    function startSpeechRecognition() {
+            const recognitionButton = document.getElementById('startRecognitionButton');
+
+            recognitionButton.addEventListener('click', function () {
+                const recognition = new webkitSpeechRecognition();
+                recognition.lang = 'ko-KR';
+                recognition.start();
+
+
+                recognition.onresult = function(event) {
+                    const spokenText = event.results[0][0].transcript;
+                    document.getElementById('recognizedText').textContent = spokenText;
+    
+                    // 서버로 음성으로 인식된 텍스트 전송
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', '/order/coffee_type', true);
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+                    xhr.send(JSON.stringify({ 'spoken_text': spokenText }));
+                }
+            })
+        }
+        document.addEventListener("DOMContentLoaded", function() {
+            playInitialVoice();  // 페이지 로드시 음성 재생
+            startSpeechRecognition();  // 음성 인식 시작
+        });
+    </script>
+</html>

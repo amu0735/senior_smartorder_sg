@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Second page</title>
+    <style>
+        body {
+            font-family: 'Gill Sans', sans-serif;
+            background-color: #f0f0f0;
+       
+        }
+        #question {
+            display: flex;
+            margin-top: 1em;
+            gap: 10px;
+        }
+
+
+        button {
+            border: none;
+            padding: 0;
+            background: none;
+            cursor: pointer;
+        }
+
+
+        h1 {
+            font-size: 5em;
+            color: rgb(0, 0, 110);
+            font-weight: bold;
+            margin-left: 100px;
+            margin-right: 100px;
+        }
+        #menu-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 2em;
+        }
+
+
+        .menu-item {
+            display: flex;
+            text-align:center;
+            flex-direction: column;
+            align-items: center;
+
+
+        }
+        .circle-btn {
+            width: 300px;
+            height: 300px;
+            background-color: rgb(214, 214, 214);
+            border-radius: 50%; /*원으로 바꿔줌*/
+            cursor: pointer;
+        }
+       
+        .circle-btn:hover {/* 마우스 호버시 */
+            border: solid 7px blue;
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.3);
+        }
+       
+
+
+        .menu-text{
+            color: rgb(0, 0, 110);
+            font-size: 3.5em;
+            font-weight: bold;
+            text-align: center;
+        }
+   
+        .circle-btn img {
+            max-width: 100%; /* Set the width to 100% */
+            max-height: 100%; /* Set the height to 100% */
+        }
+        #back {
+            width: 200px;
+            height: 50px;
+            background-color: rgb(148, 143, 174);
+            border-radius: 20px ;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 30px;
+            margin-left: 30px;
+           
+        }
+        #back a{
+            font-size: 1.2em;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+
+<body>
+    <div id="question">
+        <button type="button" id="startRecognitionButton" onclick="startSpeechRecognition()">
+            <img src="{{ url_for('static', filename='talk.png') }}" width="180" height="120" style="margin-left: 80px; margin-top: 40px;">
+        </button>
+        <h1>무엇을 주문하시겠어요?</h1>
+    </div>
+    <div id="recognizedText"></div>
+
+    <script>
+        // 페이지 로드시 실행되는 함수
+        function playInitialVoice() {
+            const synth = window.speechSynthesis;
+            const utterance = new SpeechSynthesisUtterance('무엇을 주문하시겠어요?');
+            synth.speak(utterance);
+        }
+        function redirectPage(destination) {
+            window.location.href = destination;
+        }
+
+
+        function startSpeechRecognition() {
+            const recognitionButton = document.getElementById('startRecognitionButton');
+
+            recognitionButton.addEventListener('click', function () {
+                const recognition = new webkitSpeechRecognition();
+                recognition.lang = 'ko-KR';
+                recognition.start();
+
+
+                recognition.onresult = function(event) {
+                    const spokenText = event.results[0][0].transcript;
+                    document.getElementById('recognizedText').textContent = spokenText;
+
+
+                    // 서버로 음성으로 인식된 텍스트 전송
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', '/process_text', true);
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+                    xhr.send(JSON.stringify({ 'spoken_text': spokenText }));
+
+
+                    // 음성 인식 후 리디렉션을 시작합니다.
+                    if (spokenText.includes('커피')) {
+                        redirectPage('/third_coffee');
+                    } else if (spokenText.includes('차')) {
+                        redirectPage('/third_tea');
+                    } else if (spokenText.includes('음료수')) {
+                        redirectPage('/third_beverage');
+                    }
+                }
+
+            })
+        }
+
+
+        document.addEventListener("DOMContentLoaded", function() {
+            playInitialVoice();  // 페이지 로드시 음성 재생
+            startSpeechRecognition();  // 음성 인식 시작
+        });
+    </script>
+
+
+    <div id="menu-container">
+        <div class="menu-item">
+            <a href="{{ url_for('third_coffee') }}" class="circle-btn">
+                <img src="{{ url_for('static', filename='coffee/coffee1.png') }}" width="157" height="202" style="margin-left: 80px; margin-right: 20px; margin-top: 40px; display: block;">
+            </a>
+            <p class="menu-text">커피</p>
+        </div>
+        <div class="menu-item">
+            <a href="{{ url_for('third_tea') }}" class="circle-btn">
+                <img src="{{ url_for('static', filename='tea/tea2.png') }}" width="165" height="193" style="margin-left: 80px; margin-right: 20px; margin-top: 40px; display: block;">
+            </a>
+            <p class="menu-text">차</p>
+        </div>
+        <div class="menu-item">
+            <a href="{{ url_for('third_beverage') }}" class="circle-btn">
+                <img src="{{ url_for('static', filename='beverage/beverage5.png') }}" width="135" height="233" style="margin-top: 30px;">
+            </a>
+            <p class="menu-text">음료수</p>
+        </div>
+    </div>  
+
+
+    <div id="back">
+        <a href="{{ url_for('first') }}">
+            <p>뒤로가기</p>
+        </a>
+    </div>
+</body>
+</html>
